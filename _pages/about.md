@@ -1,8 +1,8 @@
 ---
 permalink: /about/
 title: "About"
+header:
+  image: "/images/header.jpg"
 ---
 
-Tempor velit sint sunt ipsum tempor enim ad qui ullamco. Est dolore anim ad velit duis dolore minim sunt aliquip amet commodo labore. Ut eu pariatur aute ea aute excepteur laborum. Esse ea esse excepteur minim mollit qui cillum excepteur ex dolore magna. Labore deserunt fugiat incididunt incididunt sint ea. Consequat dolore aute laboris quis proident quis non et est consectetur ex eiusmod sit culpa.
-
-Cupidatat ea do et in excepteur in. Ad nostrud ut est esse eu duis ea sunt eiusmod. Aliquip tempor veniam sint elit fugiat. Velit incididunt laboris amet incididunt labore dolore irure velit excepteur commodo deserunt laborum. Consectetur eu fugiat veniam veniam Lorem labore magna eiusmod. Ea occaecat reprehenderit pariatur consectetur minim labore ut aliquip.
+I define myself as a Fullstack Engineer that loves solving problems and delivering high quality software with a strong commitment to continuous improvement. I've been working with microservices architecture, CI/CD and containers. By the moment, most of my experience is about Java related technologies. I'm always pleased to learn new technologies and being challenged in the meantime. Nowadays, I'm having fun learning functional programming with Scala, diving into its awesome ecosystem and working on side projects.
