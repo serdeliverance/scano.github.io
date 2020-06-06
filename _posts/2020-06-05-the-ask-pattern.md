@@ -122,7 +122,7 @@ You can workaround this by modifying `GetAvailableSeats` to add the sender to re
   }
 ```
 
-The code is more cumbersome than before and it becomes harder to maintain. Apart from that, we are tightly coupling both actors and adding to movie theater the innecesary responsability of handling the sender and retrieving it back. Another key point to bear in mind is that we've done it because we can, but, if MovieTheater is a component that is out of our control and we have no access to? Maybe, a lot of crazy work arrounds will raise at this point.
+The code is more cumbersome than before and it becomes harder to maintain. Apart from that, we are tightly coupling both actors and adding to movie theater the innecesary responsability of handling the sender and retrieving it back. Another key point to bear in mind is that we've done it because we can, but, what if MovieTheater is a component that is out of our control and we have no access to? Maybe, a lot of crazy work arrounds will raise at this point.
 Fortunately, we have another way to do that.
 
 ### Solution: Ask Pattern
