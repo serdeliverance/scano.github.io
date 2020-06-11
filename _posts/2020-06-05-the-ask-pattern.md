@@ -7,11 +7,13 @@ categories:
 tags:
   - akka
   - scala
+header:
+  image: "/images/header.jpg"
 ---
 
 ## Intro
 
-In this post where are gonna talk about the Ask Pattern. It is an Interaction Pattern that is used when you need some kind a request-response communication between actors. So, it differs from Tell which is used when you just want to send a message to an actor and don't care about the response (Fire and Forget).
+In this post we are gonna talk about the Ask Pattern. It is an Interaction Pattern that is used when you need some kind a request-response communication between actors. So, it differs from Tell which is used when you just want to send a message to an actor and don't care about the response (Fire and Forget).
 
 ## Project Setup
 
@@ -189,4 +191,4 @@ Even though we can implement our requirement easily using `ask pattern`, you hav
 
 ## Conclusion
 
-In this post, we have seen what the `ask pattern` is and how we can use it through a simple use case. Also, we compared that solution with another one based on `changing behavior`. Finally, we  in mind that it comes with a performance tradeoff that me need to be aware of and use it only when we really needed. The code is available on [github](https://github.com/serdeliverance/sc-blog-code)
+In this post, we have seen what the `ask pattern` is and how we can use it through a simple use case. Also, we compared that solution with another one based on `changing behavior`. Finally, we need to bear in mind that it comes with a performance tradeoff and use it only when we really need it. The code is available on [github](https://github.com/serdeliverance/sc-blog-code)
