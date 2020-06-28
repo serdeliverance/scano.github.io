@@ -169,6 +169,9 @@ object GeekCoinActor {
   
   // events
   case class QuoteUpdated(quotePercentage: Double)
+
+  // and a helper function to use later
+  def calculateNewQuote(quote: Double, quotePercentage: Double) = quote + quote * quotePercentage / 100
 }
 ```
 
@@ -211,11 +214,13 @@ Implement the command handler method:
 ``` scala
 override def receiveCommand: Receive = {
   case UpdateQuote(quotePercentage) =>
-    log.info("Received UpdateQuote: quote")
+    log.info(s"Received UpdateQuote: $quotePercentage")
     // after the event is persisted...
-    persist(QuoteUpdated(quotePercentage)) { e =>
+    persist(QuoteUpdated(quotePercentage)) { event =>
+      log.info(s"Event persisted: $event")
       // ...we update the state
-      quote = quote + quote * quotePercentage
+      quote = calculateNewQuote(quote, quotePercentage)
+      log.info(f"State updated. New state -> quote: $quote%1.2f")
     }
 }
 ```
@@ -224,8 +229,9 @@ Implement the recover method:
 
 ``` scala
 override def receiveRecover: Receive = {
-  case QuoteUpdated(quotePercentage) =>
-    quote = quote + quote * quotePercentage
+  case event @ QuoteUpdated(quotePercentage) =>
+    quote = calculateNewQuote(quote, quotePercentage)
+    log.info(f"Recovered event: $event. State -> quote: $quote%1.2f")
 }
 ```
 
@@ -245,37 +251,37 @@ geekCoinActor ! UpdateQuote(235.0)
 Running the app, we should see the following output:
 
 ```
-[INFO] [06/28/2020 11:16:32.976] [PersistentActorDemo-akka.actor.default-dispatcher-7] [akka://PersistentActorDemo/user/geekCoinActor] Received UpdateQuote: 50.0
-[INFO] [06/28/2020 11:16:33.090] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] Event persisted: QuoteUpdated(50.0)
-[INFO] [06/28/2020 11:16:33.090] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] State updated. New state -> quote: 5100.0
-[INFO] [06/28/2020 11:16:33.090] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] Received UpdateQuote: -15.0
-[INFO] [06/28/2020 11:16:33.107] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] Event persisted: QuoteUpdated(-15.0)
-[INFO] [06/28/2020 11:16:33.107] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] State updated. New state -> quote: -71400.0
-[INFO] [06/28/2020 11:16:33.108] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] Received UpdateQuote: 200.0
-[INFO] [06/28/2020 11:16:33.124] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] Event persisted: QuoteUpdated(200.0)
-[INFO] [06/28/2020 11:16:33.124] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] State updated. New state -> quote: -1.43514E7
-[INFO] [06/28/2020 11:16:33.125] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] Received UpdateQuote: -45.0
-[INFO] [06/28/2020 11:16:33.140] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] Event persisted: QuoteUpdated(-45.0)
-[INFO] [06/28/2020 11:16:33.140] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] State updated. New state -> quote: 6.314616E8
-[INFO] [06/28/2020 11:16:33.141] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] Received UpdateQuote: 235.0
-[INFO] [06/28/2020 11:16:33.157] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] Event persisted: QuoteUpdated(235.0)
-[INFO] [06/28/2020 11:16:33.158] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] State updated. New state -> quote: 1.490249376E11
+[INFO] [06/28/2020 17:58:44.360] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Received UpdateQuote: 50.0
+[INFO] [06/28/2020 17:58:44.468] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Event persisted: QuoteUpdated(50.0)
+[INFO] [06/28/2020 17:58:44.469] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] State updated. New state -> quote: 150,00
+[INFO] [06/28/2020 17:58:44.469] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Received UpdateQuote: -15.0
+[INFO] [06/28/2020 17:58:44.489] [PersistentActorDemo-akka.actor.default-dispatcher-7] [akka://PersistentActorDemo/user/geekCoinActor] Event persisted: QuoteUpdated(-15.0)
+[INFO] [06/28/2020 17:58:44.489] [PersistentActorDemo-akka.actor.default-dispatcher-7] [akka://PersistentActorDemo/user/geekCoinActor] State updated. New state -> quote: 127,50
+[INFO] [06/28/2020 17:58:44.489] [PersistentActorDemo-akka.actor.default-dispatcher-7] [akka://PersistentActorDemo/user/geekCoinActor] Received UpdateQuote: 200.0
+[INFO] [06/28/2020 17:58:44.511] [PersistentActorDemo-akka.actor.default-dispatcher-7] [akka://PersistentActorDemo/user/geekCoinActor] Event persisted: QuoteUpdated(200.0)
+[INFO] [06/28/2020 17:58:44.513] [PersistentActorDemo-akka.actor.default-dispatcher-7] [akka://PersistentActorDemo/user/geekCoinActor] State updated. New state -> quote: 382,50
+[INFO] [06/28/2020 17:58:44.513] [PersistentActorDemo-akka.actor.default-dispatcher-7] [akka://PersistentActorDemo/user/geekCoinActor] Received UpdateQuote: -45.0
+[INFO] [06/28/2020 17:58:44.534] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] Event persisted: QuoteUpdated(-45.0)
+[INFO] [06/28/2020 17:58:44.534] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] State updated. New state -> quote: 210,38
+[INFO] [06/28/2020 17:58:44.534] [PersistentActorDemo-akka.actor.default-dispatcher-12] [akka://PersistentActorDemo/user/geekCoinActor] Received UpdateQuote: 235.0
+[INFO] [06/28/2020 17:58:44.550] [PersistentActorDemo-akka.actor.default-dispatcher-13] [akka://PersistentActorDemo/user/geekCoinActor] Event persisted: QuoteUpdated(235.0)
+[INFO] [06/28/2020 17:58:44.550] [PersistentActorDemo-akka.actor.default-dispatcher-13] [akka://PersistentActorDemo/user/geekCoinActor] State updated. New state -> quote: 704,76
 ```
 
 We re running our app, the actor state is recovered by reading the evento store and you would see something like this:
 
 ```
-[INFO] [06/28/2020 11:16:57.905] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Recovered event: QuoteUpdated(50.0)
-[INFO] [06/28/2020 11:16:57.905] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Recovered event: QuoteUpdated(-15.0)
-[INFO] [06/28/2020 11:16:57.905] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Recovered event: QuoteUpdated(200.0)
-[INFO] [06/28/2020 11:16:57.905] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Recovered event: QuoteUpdated(-45.0)
-[INFO] [06/28/2020 11:16:57.905] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Recovered event: QuoteUpdated(235.0)
+[INFO] [06/28/2020 18:03:03.460] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Recovered event: QuoteUpdated(50.0). State -> quote: 150,00
+[INFO] [06/28/2020 18:03:03.461] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Recovered event: QuoteUpdated(-15.0). State -> quote: 127,50
+[INFO] [06/28/2020 18:03:03.461] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Recovered event: QuoteUpdated(200.0). State -> quote: 382,50
+[INFO] [06/28/2020 18:03:03.461] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Recovered event: QuoteUpdated(-45.0). State -> quote: 210,38
+[INFO] [06/28/2020 18:03:03.462] [PersistentActorDemo-akka.actor.default-dispatcher-6] [akka://PersistentActorDemo/user/geekCoinActor] Recovered event: QuoteUpdated(235.0). State -> quote: 704,76
 ```
 
 ## The complete code sample
 
 ``` scala
-import PersistentActorDemo.GeekCoinActor.{QuoteUpdated, UpdateQuote}
+import PersistentActorDemo.GeekCoinActor.{QuoteUpdated, UpdateQuote, calculateNewQuote}
 import akka.actor.{ActorLogging, ActorSystem, Props}
 import akka.persistence.PersistentActor
 
@@ -286,6 +292,8 @@ object PersistentActorDemo extends App {
     case class UpdateQuote(quotePercentage: Double)
     // events
     case class QuoteUpdated(quotePercentage: Double)
+
+    def calculateNewQuote(quote: Double, quotePercentage: Double) = quote + quote * quotePercentage / 100
   }
 
   class GeekCoinActor extends PersistentActor with ActorLogging {
@@ -301,15 +309,15 @@ object PersistentActorDemo extends App {
         persist(QuoteUpdated(quotePercentage)) { event =>
           log.info(s"Event persisted: $event")
           // ...we update the state
-          quote = quote + quote * quotePercentage
-          log.info(s"State updated. New state -> quote: $quote")
+          quote = calculateNewQuote(quote, quotePercentage)
+          log.info(f"State updated. New state -> quote: $quote%1.2f")
         }
     }
 
     override def receiveRecover: Receive = {
       case event @ QuoteUpdated(quotePercentage) =>
-        log.info(s"Recovered event: $event")
-        quote = quote + quote * quotePercentage
+        quote = calculateNewQuote(quote, quotePercentage)
+        log.info(f"Recovered event: $event. State -> quote: $quote%1.2f")
     }
   }
 
@@ -317,14 +325,13 @@ object PersistentActorDemo extends App {
   val system = ActorSystem("PersistentActorDemo")
   val geekCoinActor = system.actorOf(Props[GeekCoinActor], "geekCoinActor")
 
-  // sending commands to our actor
+// sending commands to our actor
   geekCoinActor ! UpdateQuote(50.0)
   geekCoinActor ! UpdateQuote(-15.0)
   geekCoinActor ! UpdateQuote(200.0)
   geekCoinActor ! UpdateQuote(-45.0)
   geekCoinActor ! UpdateQuote(235.0)
 }
-
 ```
 
 ## Improving performance
