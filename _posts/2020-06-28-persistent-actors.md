@@ -13,7 +13,7 @@ header:
 
 ## Intro
 
-In this post we are gonna talk about what event sourcing is and how it can be implemented in Akka using persistent actors.
+In this post we will talk about what event sourcing is and how it can be implemented in Akka using persistent actors.
 
 ## What is Event Sourcing?
 
@@ -89,7 +89,7 @@ libraryDependencies ++= Seq(
 
 ### Local Event Store configuration
 
-For our event store, we are gonna use [LevelDB](https://github.com/google/leveldb). We need to configure the `Akka Persistence Journal Plugin`. So, our `src/resources/application.conf` should look like this:
+For our event store, we are going to use [LevelDB](https://github.com/google/leveldb). We need to configure the `Akka Persistence Journal Plugin`. So, our `src/resources/application.conf` should look like this:
 
 ``` scala
 # local store journal conf
@@ -341,6 +341,6 @@ Snapshots are a way to store the state of an entity at a given point in time. Fo
 
 ## Conclusion
 
-In this post we have seen what `Event Sourcing` is, its pros and cons and how we can implement it using `Persistent Actors` in `Akka`. You have to bear in mind that `Event Sourcing` is a different approach for designing systems and requires a mental shift. It allows you to have a rich domain model with powerfull semantics that express better what your business does. However, it is not a silver bullet (for a simple CRUD system, it could be an inefficient and overkilling solution). In following posts we are gonna dive into Snapshots and more stuff related with `Akka Persistence`.
+In this post we have seen what `Event Sourcing` is, its pros and cons and how we can implement it using `Persistent Actors` in `Akka`. You have to bear in mind that `Event Sourcing` is a different approach for designing systems and requires a mental shift. It allows you to have a rich domain model with powerfull semantics that express better what your business does. However, it is not a silver bullet (for a simple CRUD system, it could be an inefficient and overkilling solution). In future posts we will talk about Snapshots and more stuff related with `Akka Persistence`.
 
 The code is available on [GitHub](https://github.com/serdeliverance/sc-blog-code/tree/master/akka-persistence)
