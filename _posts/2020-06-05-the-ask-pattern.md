@@ -13,7 +13,7 @@ header:
 
 ## Intro
 
-In this post we are gonna talk about the Ask Pattern. It is an Interaction Pattern that is used when you need some kind a request-response communication between actors. So, it differs from Tell which is used when you just want to send a message to an actor and don't care about the response (Fire and Forget).
+In this post we'll dive into the `Ask Pattern` in `Akka`. It is an Interaction Pattern that is used when you need some kind a request-response communication between actors. So, it differs from Tell which is used when you just want to send a message to an actor and don't care about the response (Fire and Forget).
 
 ## Project Setup
 
