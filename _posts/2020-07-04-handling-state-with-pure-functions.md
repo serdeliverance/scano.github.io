@@ -1,7 +1,7 @@
 ---
 title: Handling state with pure functions in Scala
 date: 2020-07-04 17:00:32
-excerpt: "How to handle state following a pure functional programming approach"
+excerpt: "How to handle state change using pure functions"
 categories:
   - blog
 tags:
