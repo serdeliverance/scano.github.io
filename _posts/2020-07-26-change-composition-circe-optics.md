@@ -52,9 +52,49 @@ Let's imagine that we are working in a API for a travel agency and that in some 
 
 ## Using Optics
 
-## Redefining our API with State Actions
+Let's define our transformations using `Optics`. For example, the following are the transformation for modifying the name and hotel_type attributes:
 
-## Compose changes
+``` scala
+def name(name: String): Json => Json = root.name.string.set(name)
+
+def hotelType(hotelType: String): JsonAction = root.hotel_type.string.set(hotelType)
+
+// the rest of the transformations follows the same pattern
+```
+
+`root` is a `JsonPath` which brings us methods for traversing the `JSON` structure up to the element that we are interested in. For doing that, it uses a `Scala` feature called `Dynamic` which allows it to call methods that actually don't exists (for example: `root.hotel_type` or `root.name`). As we can see, this is not type safe.
+
+It is interesting to see that all our transformations are actually, functions from `Json => Json`. In fact, they are `state actions`.
+
+We'll define a type alias for reducing repeated code. We'll call it `JsonAction`:
+
+``` scala
+type JsonAction = Json => Json
+```
+
+Finally, these are all our transformations:
+
+``` scala
+def name(name: String): JsonAction = root.name.string.set(name)
+
+def hotelType(hotelType: String): JsonAction = root.hotel_type.string.set(hotelType)
+
+def stars(stars: Int): JsonAction = root.stars.int.set(stars)
+
+def enabled(active: Boolean): JsonAction = root.active.boolean.set(active)
+
+def locationAddress(address: String): JsonAction = root.location.address.string.set(address)
+
+def locationZipCode(zipCode: String): JsonAction = root.location.zipcode.string.set(zipCode)
+```
+
+## Redefining our API with composable State Actions
+
+Having defined our transformations that way, we can define transformation pipelines by chaining functions that we need. For example:
+
+``` scala
+// TODO
+```
 
 ## A more functional approach using Fold
 
