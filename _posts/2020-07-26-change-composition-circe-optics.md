@@ -55,3 +55,7 @@ Let's imagine that we are working in a API for a travel agency and that in some 
 ## Redefining our API with State Actions
 
 ## Compose changes
+
+## A more functional approach using Fold
+
+## Conclusions
