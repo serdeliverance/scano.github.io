@@ -42,12 +42,8 @@ Let's imagine that we are working in a API for a travel agency and that in some 
   "hotel_type" : "premium",
   "stars" : 5,
   "location" : {
-    "city" : {
-      "id" : 5296
-    },
     "address" : "500 East A Street South",
     "zipcode" : "69153-3111",
-    "latitude" : 41.11161
   }
 }
 ```
