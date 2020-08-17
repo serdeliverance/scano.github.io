@@ -1,6 +1,6 @@
 ---
 title: Chaining states changes on json with Circe, Optics and Pure Functions
-excerpt: "Chain modifications over a json object using Circe, Optics and pure functions"
+excerpt: "Thoughts for working with json using Circe Optics and Pure Functions"
 categories:
   - blog
 tags:
@@ -35,19 +35,77 @@ Let's imagine that we are working in a API for a travel agency and that in some 
 
 ``` json
 {
-  "id" : 3305,
-  "active" : true,
-  "name" : "Voyage Dream",
-  "hotel_type" : "premium",
-  "stars" : 5,
-  "location" : {
-    "address" : "500 East A Street South",
-    "zipcode" : "69153-3111",
+  "id": 3305,
+  "active": true,
+  "name": "Voyage Dream",
+  "hotel_type": "premium",
+  "stars": 5,
+  "location": {
+    "address": "500 East A Street South",
+    "zipcode": "69153-3111"
   }
 }
 ```
 
-## Using cursors
+## Using Cursors
+
+The traditional way of traversing and modifying `JSON` in `Circe` is using `Cursors`. Here is an example:
+
+``` scala
+val json = parse(jsonStr).getOrElse(Json.Null)
+
+// creating the cursor
+val cursor = json.hcursor
+
+val result = cursor
+  .downField("name").withFocus(_.mapString(_ => "The Lost Wonder")).top
+  .fold("parser error") (_.toString())
+```
+
+I think it is acceptable for modifying just one field. Of course, you can see that its some boilerplate, but for a simple modification theres no problem. Now, what if we want to perform multiple modifications?
+
+Lets see a possible approach:
+
+``` scala
+val result = cursor
+  .downField("name").withFocus(_.mapString(_ => "The Lost Wonder")).top
+  .flatMap(json => json.hcursor.downField("hotel_type").withFocus(_.mapString(_ => "premium")).top)
+  .flatMap(json => json.hcursor.downField("stars").withFocus(_ => Json.fromInt(5)).top)
+  .fold("parser error")(_.toString())
+```
+
+There is a hug amount of code. We start thinking if we can do it better. Apart from that, we realized that using that solution we can not reuse singular transformations. For example: what if I want to have name modification in another transformation or pipeline? We have to repeat code and It is not what we want.
+
+We can separate our transformations in independent functions:
+
+``` scala
+def updateName(name: String): Json => Option[Json] =
+  json => json.hcursor.downField("name")
+            .withFocus(_.mapString(_ => name)).top
+def updateHotelType(hotelType: String): Json => Option[Json] =
+  json => json.hcursor.downField("hotel_type")
+            .withFocus(_.mapString(_ => hotelType)).top
+
+def updateStars(stars: Int): Json => Option[Json] =
+  json => json.hcursor.downField("stars")
+    .withFocus(_ => Json.fromInt(stars)).top
+``` 
+
+And use them with `for-comprehensions`:
+
+``` scala
+// modifying multiple fields using cursors and for comprehension
+
+val result = for {
+  step1 <- updateName("The Lost Wonder")(doc)
+  step2 <- updateHotelType("premium") (step1)
+  jsonResult <- updateStars(5) (step2)
+} yield jsonResult
+```
+
+It is great. Now we can reuse specific transformations, but dealing with multiple `Option` in a `for comprehension` sounds like an overkill. There is some boilerplate yet, but it is more elegant too. However, we know we can do it even better. A part from that, having the intermediate n steps inside the comprehension (`step1`, `step2`... `stepN`) is not expresive enough.
+
+Fortunately, we have `Circe Optics` to help us reducing these boilerplate.
 
 ## Using Optics
 
@@ -58,20 +116,20 @@ def name(name: String): Json => Json = root.name.string.set(name)
 
 def hotelType(hotelType: String): JsonAction = root.hotel_type.string.set(hotelType)
 
-// the rest of the transformations follows the same pattern
+// the rest of the transformations follow the same pattern
 ```
 
 `root` is a `JsonPath` which brings us methods for traversing the `JSON` structure up to the element that we are interested in. For doing that, it uses a `Scala` feature called `Dynamic` which allows it to call methods that actually don't exists (for example: `root.hotel_type` or `root.name`). As we can see, this is not type safe.
 
 It is interesting to see that all our transformations are actually, functions from `Json => Json`. In fact, they are `state actions`.
 
-We'll define a type alias for reducing repeated code. We'll call it `JsonAction`:
+We'll define a type alias for reducing repeated code. Lets call it `JsonAction`:
 
 ``` scala
 type JsonAction = Json => Json
 ```
 
-Finally, these are all our transformations:
+Finally, these are our transformations:
 
 ``` scala
   // transformations
@@ -93,7 +151,7 @@ Finally, these are all our transformations:
 Having defined our transformations that way, we can define transformation pipelines by chaining functions that we need. For example:
 
 ``` scala
-val result1: String = json.map(
+val result: String = json.map(
   setName("The Lost Wonder")
     .andThen(setHotelType("Premium"))
     .andThen(setStars(5))
@@ -132,25 +190,48 @@ val result2: String = json.map(update(
   .fold(_ => "invalid json", r => r)
 ```
 
-Something interesting about that is that we can define different pipelines by reusing those transformations according to our needs.
+This solution allow us to define different pipelines by reusing those transformations according to our needs.
 
-## Refactor our API by using Fold
+## Refactor our API using Fold
 
 Chaining functions as we did is a great improvement, but at first glance we realized that the code has some boilerplates and we start thinking if we can refactor it to be more functional and clean.
 
-What have we done so far? We have been defining transformations as functions that we can reutilize and combine together. In the FP world there is a well known function for cases like that, when we want to apply different operations starting from an initial value. This function is called `fold` and we can implement that for our use case:
+What have we done so far? We have been defining transformations as functions that be reused and combined together. In the FP world there is a well known function for cases like that, when we want to apply different operations starting from an initial value. This function is called `fold` and we can implement it for our use case:
 
 ``` scala
-def fold(initial: Json)(transformations: List[JsonAction]): Json = {
+private def fold(initial: Json)(transformations: List[JsonAction]): Json = {
 
   @tailrec
-  def go(json: Json, tranformations: List[JsonAction]): Json = {
-    if (tranformations.isEmpty) json
-    else go(tranformations.head(json), tranformations.tail)
+  def go(json: Json, transformations: List[JsonAction]): Json = {
+    if (transformations.isEmpty) json
+    else go(transformations.head(json), transformations.tail)
   }
 
   go(initial, transformations)
 }
 ```
 
+And our update method (just named `updateF` to differentiating it from the previous one) would look like this:
+
+``` scala
+def updateF(name: String,
+            hotelType: String,
+            stars: Int,
+            address: String,
+            zipCode: String): JsonAction =
+  fold(_)(List(
+    setName(name),
+    setHotelType(hotelType),
+    setStars(stars),
+    setLocationAddress(address),
+    setLocationZipCode(zipCode)
+  ))
+```
+
+We can see that it is more easy to read and that has less boilerplate code.
+
 ## Conclusions
+
+In this post we have seen how to use `Circe Optics` in conjuntion with some FP ideas that can make our code more modular, clean, mantainable, easy to understand and fun when dealing `JSON` modifications.
+
+The code is available on [GitHub](https://github.com/serdeliverance/sc-blog-code/tree/master/circe-optic-compose-demo)
