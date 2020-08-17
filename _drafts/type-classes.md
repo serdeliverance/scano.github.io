@@ -170,7 +170,109 @@ The function is provided by `Cats` in `Monoid.combineAll`.
 
 # The option Monoid
 
-When we have a `Semigroup` that is not a `Monoid`, how we can perform operations like collapse? One strategy is to lift the Semigroup.
+When we have a `Semigroup` that is not a `Monoid`, how we can perform operations like collapse? One strategy is to lift the Semigroup to an Option, and have a Monoid[Option] that can perform the combine operation.
 
 `TODO continue with the Option monoid in Monoid section of Cats doc`
+
+Lifting and combining `Semigroups` into `Option` is provided by `Cats` with `Semigroup.combineAllOption`
+
+# Applicative and Traversable Functors
+
+See the following powerful function providing by future:
+
+``` scala
+import scala.concurrent.{ExecutionContext, Future}
+
+def traverseFuture[A, B](as: List[A])(f: A => Future[B])(implicit ec: ExecutionContext): Future[List[B]] =
+  Future.traverse(as)(f)
+```
+
+This functions applies de `f` function to any element of the list, and collects its results as it goes.
+
+This idea can be abstracted to be applied to any type and to be used in different contexts (ex: validation, Option, Either, or handling State)
+
+## Functor
+
+`Functor` is a type class that abstract over type the `map` operation. In other words, it has the form of a trait that has the `map` method:
+
+``` scala
+trait Functor[F[_]] {
+  def map[A, B](fa: F[A])(f: A => B): F[B]
+}
+```
+
+Examples of functors are `List`, `Option`, `Future` and wherever type that has a `map` operation.
+
+`TODO think another example... because the following was taken from Cats`
+``` scala
+// Example implementation for Option
+implicit val functorForOption: Functor[Option] = new Functor[Option] {
+  def map[A, B](fa: Option[A])(f: A => B): Option[B] = fa match {
+    case None    => None
+    case Some(a) => Some(f(a))
+  }
+}
+```
+
+`Functor` must obey the following laws:
+
+* Composition: mapping with `f` and then with `g` is the same as mapping once with the composition of `f` and `g`
+
+``` scala
+fa.map(f).map(g) == fa.map(f.andThen(g))
+```
+
+* Identity: mapping a value with the identity function, returns the same value. 
+
+``` scala
+fa.map(x => x) == x
+```
+
+Functors allows lifting pure functions `A => B` into an effectful function.
+
+Example: given the `Functor[F]` and a function `f: A => B` it can convert (lift) that into `F[A] => F[B]`
+
+``` scala
+trait Functor[F[_]] {
+  def map[A, B](fa: F[A])(f: A => B): F[B]
+
+  def lift[A, B](f: A => B): F[A] => F[B] =
+    fa => map(fa)(f)
+}
+```
+
+### Effect management
+
+The `F` in Functor is referred as `effect` or `computational context`. So, a `Functor` allows to apply a pure function (some `f: A => B`) to a value which is inside a computational context and returning a result preserving its original context (`F`)
+
+## Applicative
+
+`Applicative` is a type class that extends `Functor` and adds two methods: `ap` and `pure`:
+
+``` scala
+trait Applicative[F[_]] extends Functor[F] {
+  def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]
+
+  def pure[A](a :A): F[A]
+
+  def map[A, B](fa: F[A])(f: A => B): F[B] = ap(pure(f)) (fa)
+}
+```
+
+`pure` transforms the value into a the type constructor.
+
+`TODO laws of Applicatives`
+
+`Applicative` type class must obey the following rules:
+
+* Associativity
+
+* Left identity
+
+* Right identity
+
+`TODO Pros and Cons`
+
+While `Functor` can deal with one single effect, `Applicative` allows working with multiple independent effects and then compose them. We can work with N number of independent effects using `Applicatives`.
+
 ## Conclusions
