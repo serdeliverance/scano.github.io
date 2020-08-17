@@ -1,5 +1,5 @@
 ---
-title: Chaining states changes on json with Circe, Optics and Pure Functions
+title: Chaining states changes on json with Circe Optics and Pure Functions
 date: 2020-08-16 21:00:00
 excerpt: "Thoughts for working with json using Circe Optics and Pure Functions"
 categories:
@@ -181,7 +181,7 @@ def update(name: String,
 Lets use our new update method:
 
 ``` scala
-val result2: String = json.map(update(
+val result: String = json.map(update(
   name = "The Lost Wonder",
   hotelType = "Premium",
   stars = 5,
