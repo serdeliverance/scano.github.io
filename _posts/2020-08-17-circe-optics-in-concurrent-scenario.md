@@ -1,7 +1,7 @@
 ---
-title: Circe Optics on current scenarios
+title: Circe Optics in current scenarios
 date: 2020-08-17 12:00:00
-excerpt: "Just a little for testing how Circe Optics works under concurrent scenarios"
+excerpt: "Just a little test to see how Circe Optics works under concurrent scenarios"
 categories:
   - blog
 tags:
