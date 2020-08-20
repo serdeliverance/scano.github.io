@@ -11,11 +11,11 @@ header:
 
 ## Intro
 
-`TODO`
+In this post we are going to review the most commonly used type classes that we can find in a daily basis. The aim is to describe them and help you to recognize them so wherever you heard about `functor`, `monoid`, `monoid` and `semigroup` don't run elsewhere scaried because of these strange words that sounds very crazy at first but there are not more than a description of some kind of operations that can be performed over types.
 
 ## Type Classes
 
-Type classes are a tool in functional programming to enable ad-hoc polymorphism (aka overloading in OOP). In OOP languages we used to have polimorphysm by subtyping.
+Type classes is a pattern originated in Haskell to enable ad-hoc polymorphism (aka overloading in OOP). In OOP languages we used to have polimorphysm by subtyping.
 
 A type class is a trait that takes a type and describes the operations that can be applied to that type.
 
@@ -247,23 +247,39 @@ The `F` in Functor is referred as `effect` or `computational context`. So, a `Fu
 
 ## Applicative
 
-`Applicative` is a type class that extends `Functor` and adds two methods: `ap` and `pure`:
+`Applicative` extends `Functor` and adds two methods: `ap` and `pure`:
 
 ``` scala
+import cats.Functor
+
 trait Applicative[F[_]] extends Functor[F] {
-  def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]
+	def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]
 
-  def pure[A](a :A): F[A]
+	def pure[A](a: A): F[A]
 
-  def map[A, B](fa: F[A])(f: A => B): F[B] = ap(pure(f)) (fa)
+	def map[A, B](fa: F[A])(f: A => B): F[B] = ap(pure(f))(fa)
 }
 ```
 
-`pure` transforms the value into a the type constructor.
+`pure` wraps the value into the type constructor.
 
-`TODO laws of Applicatives`
+`ap` allows compose two effectful values through `map`
 
-`Applicative` type class must obey the following rules:
+`ap` could be explained through an equivalent formulation: `product`:
+
+``` scala
+trait Applicative[F[_]] extends Functor[F] {
+	def product[A, B](fa: F[A], fb: F[B]): F[(A, B)]
+
+	def pure[A](a: A): F[A]
+}
+```
+
+`ap` is equivalent to applying `map` and then `product` operations.
+
+For a type class to be an `Applicative` it has to define the `ap` + `map` operations or the `product` operation in addition to `pure`. These set of operations allows to compose effects which is its aim and, in order to do that, an `Applicative` has to obey some specefic laws.
+
+### Laws
 
 * Associativity
 
@@ -271,8 +287,72 @@ trait Applicative[F[_]] extends Functor[F] {
 
 * Right identity
 
-`TODO Pros and Cons`
+As I said previously, these laws guarantees that this `Applicative` can compose effects.
 
-While `Functor` can deal with one single effect, `Applicative` allows working with multiple independent effects and then compose them. We can work with N number of independent effects using `Applicatives`.
+### Applicatives for effect management
+
+With a `Functor` we can work with a single effect. `Applicative` allows working with multiples independent effects.
+
+``` scala
+import cats.Applicative
+
+def product3[F[_]: Applicative, A, B, C](fa: F[A], fb: F[B], fc: F[C]): F[(A, B, C)] = {
+  val F = Applicative[F]
+  val fabc = F.product(F.product(fa, fb), fc)
+  F.map(fabc) { case ((a, b), c) => (a, b, c) }
+}
+```
+
+### Effect composition
+
+The aim to `Applicative` type class is to compose effects, so there is a straightforward way to compose `map`, `product` or `ap` for a fixed number `n` of independent effects, and there are `mapN`, `productN` and `apN` (being `n` a number between 1 and 22)
+
+`TODO look for another example`
+
+``` scala
+import java.sql.Connection
+
+val username: Option[String] = Some("username")
+val password: Option[String] = Some("password")
+val url: Option[String] = Some("some.login.url.here")
+
+// Stub for demonstration purposes
+def attemptConnect(username: String, password: String, url: String): Option[Connection] = None
+
+
+Applicative[Option].map3(username, password, url)(attemptConnect)
+```
+
+In case when you don't know the exact number of effects, you could need something like that:
+
+``` scala
+// in case we are working with List and Options, but it can be translated to other Applicatives as well.
+
+def sequenceOption[A](fa: List[Option[A]]): Option[List[A]] = ???
+
+// Alternatively..
+def traverseOption[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] = ???
+
+```
+
+By importing `cats.implicits._` we can have these functions in scope.
+
+``` scala
+impor cats.implicits._
+
+List(1, 2, 3).traverse(i => Some(i): Option[Int])
+
+(username, password, url).mapN(attemptConnect)
+```
+
+There are instances of `Applicative` for `Future, Option. Either, Try` providede by cats, otherwise, you are free to create one for the data type that you need.
+
+## Monad
+
+`Monad` is a type class which extends `Applicative` and provides the method called `flatten`. This method take the value inside the context, and join the contexts togheter in order to have a single context. Example:
+
+``` scala
+List(List(1), List(2, 3)).flatten
+```
 
 ## Conclusions

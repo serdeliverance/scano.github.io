@@ -1,6 +1,6 @@
 ---
 title: Implicits
-excerpt: "How to handle state change using pure functions"
+excerpt: "What are implicits and how we can use them?"
 categories:
   - blog
 tags:
@@ -15,9 +15,16 @@ header:
 
 ## Implicits
 
-### Implicit methods
+Implicits in Scala refers to two this:
 
-### Implicit parameters
+* a value that can be passed automatically by the compiler
+* a conversion from one type to another that is made by the compiler automatically.
+
+## Implicit methods
+
+## Implicit parameters
+
+Implicits parameters are inserted by the compiler by looking at the search scope where the function is called.
 
 Implicit parameters can be:
 
@@ -27,7 +34,6 @@ Implicit parameters can be:
 
 And all of them must be inside a class, object or trait in order to be visible by the compiler.
 
-* Note: implicit parameters are not the same as default args. Implicits parameters are inserted by the compiler by looking at the search scope where the function is called.
 
 ### Implicit scope
 
@@ -47,6 +53,10 @@ Implicit scope
     - List companion
     - Ordering companion
     - all the supertype involved = A or any supertype
+
+## Implicit Conversions
+
+If you call `someMethod` over an object `a` of a class `A`, and that class does not supports the method `someMethod`, then the `Scala` compiler will look for an implicit conversion
 
 ## Best practices
 
@@ -79,4 +89,4 @@ then package them in different objects, in order to be easier for you to select 
 
 ## Conclusion
 
-We have seen how we can refactor an API which modifies data in place to become a more pure one just using plain `Scala`. We modeled our state change as pure functions using `state actions`. In fact, there is more power in this kind of functions. Together with `combinators` (which are HOF) you can create `fluent APIs` to express your data change pipeline in a chainable way. 
+`TODO`
