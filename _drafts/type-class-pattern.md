@@ -1,6 +1,6 @@
 ---
 title: Type Class Pattern
-excerpt: "What is the Type Class Pattern and Why is it useful"
+excerpt: "What is the Type Class Pattern and Why it is useful"
 categories:
   - blog
 tags:

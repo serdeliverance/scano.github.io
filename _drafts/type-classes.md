@@ -1,6 +1,6 @@
 ---
-title: Type Classes
-excerpt: "Notes about Type Classes"
+title: Monoids, Semigroups, Monads, Functors, Applicatives and more
+excerpt: "A brief introduction to ththe most popular type classes. What they are, why them matters and the terminology involved"
 categories:
   - blog
 tags:
