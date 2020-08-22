@@ -54,6 +54,8 @@ Implicit scope
     - Ordering companion
     - all the supertype involved = A or any supertype
 
+If the compiler finds two candidates for the same type that it wants, it will fail with an `ambiguous implicit values` error.
+
 ## Implicit Conversions
 
 If you call `someMethod` over an object `a` of a class `A`, and that class does not supports the method `someMethod`, then the `Scala` compiler will look for an implicit conversion
