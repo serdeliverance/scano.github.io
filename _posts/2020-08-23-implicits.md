@@ -94,9 +94,9 @@ And all of them must be inside a class, object or trait in order to be visible b
 
 `Implicit scope` are the places where the compiler searchs for implicits. The compiler will look for them in the following order:
 
-1) normal scope or LOCAL SCOPE (the local context where the function with implicit params is called)
-2) imported scope      (example: ExecutionContext.Implicits.global)
-3) companion objects of all types involved in the method signature
+1. normal scope or LOCAL SCOPE (the local context where the function with implicit params is called)
+2. imported scope      (example: ExecutionContext.Implicits.global)
+3. companion objects of all types involved in the method signature
 
 Example. Having the following function:
 
