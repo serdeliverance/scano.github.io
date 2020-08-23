@@ -110,7 +110,18 @@ Now its time talk about `Monoids`
 
 # Monoid
 
-`Monoid` is a type class which extends `Semigroup` and provides the `empty` method.
+`Monoid` is an abstraction that represents the concepts of adding or combining elements with the addition of an identity or `zero` element.
+
+More technically, `Monoid` is a type class that defines a binary operation (an operation of type `(A, A) => A`) called `combine` and an empty element of type `A`: 
+
+``` scala
+trait Monoid[A] {
+  def combine(x: A, y: A): A
+  def empty: A
+}
+```
+
+You can also think of a `Monoid` as a type class which extends `Semigroup` and provides the `empty` method.
 
 ``` scala
 trait Semigroup[A] {

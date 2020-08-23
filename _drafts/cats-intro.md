@@ -61,6 +61,10 @@ import cats.Show
 
 ## Second sample: Eq type class
 
+## Monoids
+
+## Semigroups
+
 
 ## Conclusion
 
