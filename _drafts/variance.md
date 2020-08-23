@@ -36,7 +36,9 @@ val animals: List[Animal] = dogs
 
 * variance of the type class
 
-* variance annotations affect the compiler's ability to select instances during implicit resolutione
+* variance annotations affect the compiler's ability to select instances during implicit resolution.
+
+* variance is the ability to substitute one value for another.
 
 ### Covariance
 
@@ -58,4 +60,14 @@ trait F[-A]     // the symnol "-" states that is contravariant
 
 Contravariance means that the type `F[B]` is a subtype of `F[A]` if `A` is a subtype of `B`
 
+### Invariance
+
+``` scala
+trait F[A]
+```
+
+This means the types `F[A]` and `F[B]` are never subtypes of one another, no matter the relationship between `A` and `B`.
+
 ## Conclusion
+
+`Variance` is important because it determines the ability of the compiler to find a matching type during implicit resolution. In this case, the compiler looks for a type or subtype. Using `Variance` properly, we can help the compiler to control the type class instance selection

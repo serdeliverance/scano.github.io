@@ -63,3 +63,8 @@ import cats.Show
 
 
 ## Conclusion
+
+* The type classes are generic traits that are define in the `cats` package.
+* Each type has a companion object an apply method for materializing instance, one or more construction methods for creating instances, and other helper methods.
+* Default instances for standard library types are provided in the package `cats.instances`
+* Many type classes have `syntax` provided in `cats.syntax` package.
