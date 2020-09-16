@@ -5,6 +5,7 @@ categories:
   - blog
 tags:
   - scala
+  - cats
 header:
   image: "/images/header.jpg"
 ---
@@ -65,6 +66,20 @@ import cats.Show
 
 ## Semigroups
 
+## Functors
+
+`Functor` is the abstraction behind. So, the `Functor[A]` type class defines `map` as a function of type `(A => B) => F[B]`
+
+``` scala
+package cats
+
+import scala.language.higherKinds
+
+trait Functor[F[_]] {
+  def map[A, B](fa: F[A])(f: A => B): F[B]
+}
+
+```
 
 ## Conclusion
 
