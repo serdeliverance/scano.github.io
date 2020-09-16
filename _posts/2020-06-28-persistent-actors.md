@@ -1,14 +1,14 @@
 ---
 title: Persistent Actors and Event Sourcing
 date: 2020-06-28 15:35:00
-excerpt: "Persistent actors and Event Sourcing in Akka Peristence"
+excerpt: 'Persistent actors and Event Sourcing in Akka Persistence'
 categories:
   - blog
 tags:
   - akka
   - scala
 header:
-  image: "/images/header.jpg"
+  image: '/images/header.jpg'
 ---
 
 ## Intro
@@ -24,9 +24,10 @@ coin_id    | name         | price
 
 1          | "Bitcoin"    | 9650
 2          | "Ethereum"   | 230
-3          | "Litecoin"   | 42  
+3          | "Litecoin"   | 42
 4          | "Geekcoin"   | 13
 ```
+
 And it is OK. But, maybe it could be not enough for this business. What we are getting is the most recent value of our coins. But what if we need to know about what was the Bitcoin value last week? In other words: How can we query for a previous state? Is it possible? What if we need to know how we have arrived to the current state?
 
 Making history can allow us to have some data to analize and support business decisions.
@@ -38,6 +39,7 @@ How can we do that? The answer is: Event Sourcing
 How? Instead of storing the current state, we store events related to our domain model. The application then re apply those events over our domain entity in order to recover its state.
 
 PROS:
+
 - high performance: events are only appended. We can use db that performs well on writing operations
 - avoids relational stores and ORM.
 - full trace of every state.
@@ -49,6 +51,7 @@ PROS:
 - ORM independence (we just store the serialized data that we need to apply to our entity to recover its state)
 
 CONS:
+
 - query state is potentially expensive (because of that, it is often used together with [CQRS](https://martinfowler.com/bliki/CQRS.html))
 - potential performance issues with long-lived entities
 - not the best fit for all business
@@ -56,10 +59,10 @@ CONS:
 
 ### Terminology
 
-* Command: an operation sent to a domain object.
-* Event: represents something that have happened in the past (ex: `QuoteUpdated`, `OrderCreated`, etc) and that causes our domain entity to change its state. In other words: it event represents an state change of our domain entity.
-* State: the state of the domain entity.
-* Event store: the place when we store the events of our domain entities.
+- Command: an operation sent to a domain object.
+- Event: represents something that have happened in the past (ex: `QuoteUpdated`, `OrderCreated`, etc) and that causes our domain entity to change its state. In other words: it event represents an state change of our domain entity.
+- State: the state of the domain entity.
+- Event store: the place when we store the events of our domain entities.
 
 The flow is the following:
 
@@ -85,18 +88,20 @@ libraryDependencies ++= Seq(
   "org.fusesource.leveldbjni"   % "leveldbjni-all"   % leveldbjniVersion
 )
 ```
- Basically, it contains the `Akka Persistence` version and `LevelDB` dependencies for communicating with our local Event Store.
+
+Basically, it contains the `Akka Persistence` version and `LevelDB` dependencies for communicating with our local Event Store.
 
 ### Local Event Store configuration
 
 For our event store, we are going to use [LevelDB](https://github.com/google/leveldb). We need to configure the `Akka Persistence Journal Plugin`. So, our `src/resources/application.conf` should look like this:
 
-``` scala
+```scala
 # local store journal conf
 akka.persistence.journal.plugin = "akka.persistence.journal.leveldb"
 akka.persistence.journal.leveldb.dir = "target/akka-pers-demo/journal"
 ```
-We configured our local event store db path on `target/akka-pers-demo` direcory, so be sure to have this directory created before running the code. 
+
+We configured our local event store db path on `target/akka-pers-demo` direcory, so be sure to have this directory created before running the code.
 
 ## Use case
 
@@ -115,11 +120,13 @@ And then we have the following event:
 // events
 case class QuoteUpdated(quotePercentage: Double)
 ```
+
 Of course, as a consequence of firing those events over time, our entity state will be updated. Let's define our state:
 
-``` scala
+```scala
 var quote: Double = 500   // some value
 ```
+
 And somewhere we will have our event store having an structure similar to the following:
 
 ```
@@ -130,6 +137,7 @@ event_id    | event         | entity_type | entity_id  | event_data
 102         | "Litecoin"    | "Geekcoin"  |   3        | {...}
 103         | "Geekcoin"    | "Bitcoin"   |   1        | {...}
 ```
+
 In `Akka Persistence` our event store can defer a little bit but follows the same idea. In addition to the fields that identifies the entities and events, it is interesting to see how the event data is stored. They are stored as raw json values in this case, but we can apply the serialization mechanism that best fit our needs. It is up to the application to deserialize the `event_data` into a domain event that then will be applied to the specific entity. We are ORM independent.
 
 How can we put all these stuff together? Using `Persistent Actors`.
@@ -144,7 +152,7 @@ How can we put all these stuff together? Using `Persistent Actors`.
 
 For creating a Persistent Actor what we need to do is to extend the `PersistentActor` trait:
 
-``` scala
+```scala
 class GeekCoinActor extends PersistentActor {
 
   override def persistenceId: String = ???
@@ -161,12 +169,12 @@ When a persistent actor receives a command, it creates an event based on these c
 
 First, let's create a companion object for holding our commands and events:
 
-``` scala
+```scala
 object GeekCoinActor {
-  
+
   // commands
   case class UpdateQuote(quotePercentage: Double)
-  
+
   // events
   case class QuoteUpdated(quotePercentage: Double)
 
@@ -188,7 +196,7 @@ class GeekCoinActor extends PersistentActor {
 
 Before continue, let's add `ActorLogging` trait in order to have a trace of our actor behavior:
 
-``` scala
+```scala
 class GeekCoinActor extends PersistentActor with ActorLogging {
   // continue below...
 }
@@ -211,7 +219,7 @@ class GeekCoinActor extends PersistentActor with ActorLogging {
 
 Implement the command handler method:
 
-``` scala
+```scala
 override def receiveCommand: Receive = {
   case UpdateQuote(quotePercentage) =>
     log.info(s"Received UpdateQuote: $quotePercentage")
@@ -227,7 +235,7 @@ override def receiveCommand: Receive = {
 
 Implement the recover method:
 
-``` scala
+```scala
 override def receiveRecover: Receive = {
   case event @ QuoteUpdated(quotePercentage) =>
     quote = calculateNewQuote(quote, quotePercentage)
@@ -237,7 +245,7 @@ override def receiveRecover: Receive = {
 
 Let's test our persistent actor:
 
-``` scala
+```scala
 val system = ActorSystem("PersistentActorDemo")
 val geekCoinActor = system.actorOf(Props[GeekCoinActor], "geekCoinActor")
 
@@ -248,6 +256,7 @@ geekCoinActor ! UpdateQuote(200.0)
 geekCoinActor ! UpdateQuote(-45.0)
 geekCoinActor ! UpdateQuote(235.0)
 ```
+
 Running the app, we should see the following output:
 
 ```
@@ -280,7 +289,7 @@ We re running our app, the actor state is recovered by reading the evento store 
 
 ## The complete code sample
 
-``` scala
+```scala
 import PersistentActorDemo.GeekCoinActor.{QuoteUpdated, UpdateQuote, calculateNewQuote}
 import akka.actor.{ActorLogging, ActorSystem, Props}
 import akka.persistence.PersistentActor
@@ -337,7 +346,7 @@ object PersistentActorDemo extends App {
 ## Improving performance
 
 As you can imagine, recovering the state of an entity with lot of events by querying them from the genesys can lead to a performance issue. It that case, you can periodically take snapshots.
-Snapshots are a way to store the state of an entity at a given point in time. For example, we can define taking an snapshot every 20 events. It allow us to fast recover the state by re applying the events from the snapshot point in time up to the most recent event. 
+Snapshots are a way to store the state of an entity at a given point in time. For example, we can define taking an snapshot every 20 events. It allow us to fast recover the state by re applying the events from the snapshot point in time up to the most recent event.
 
 ## Conclusion
 
