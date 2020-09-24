@@ -174,3 +174,62 @@ Just running `tsc` with the `w` (watch mode) option.
 ``` typescript
 tsc -w
 ```
+
+## Enums
+
+Indicates that it is a collection of closed related values. It does not bring any perfomance improvement. The benefits of enums lays on the semantics it brings.
+
+``` typescript
+enum MatchResult {
+  HomeWin = 'H',
+  AwayWin = 'A',
+  Draw = 'D'
+}
+
+
+for (let match of matches) {
+  if (match[1] === 'Man United' && match[5] === MatchResult.HomeWin) {
+    manUnitedWins++
+  } else if (match[2] === 'Man United' && match[5] === MatchResult.AwayWin) {
+    manUnitedWins++
+  }
+}
+
+```
+
+Some things to mention:
+
+* the enum syntax follows almost the same rules as regular js objects
+* creates an object with the same keys and values when transpiled to js code.
+* use it when you have a small fixed set of values that are very closely related and known at compile time.
+
+## Type Assertions
+
+Is a way of overriding `Typescript` default behavior when asserting types. For example:
+
+``` typescript
+enum MatchResult {
+  HomeWin = 'H',
+  AwayWin = 'A',
+  Draw = 'D'
+}
+
+
+this.data = fs
+  .readFileSync(this.filename, {
+    encoding: 'utf-8'
+  })
+  .split('\n')
+  .map((row: string): string[] => row.split(','))
+  .map((row: string[]): any => {
+    return [
+      dateStringToDate(row[0]),
+      row[1],
+      row[2],
+      parseInt(row[3]),
+      parseInt(row[4]),
+      row[5] as MatchResult   // we are sure this value can be 'H', 'A' or 'D' so we tell TS to consider it as a MatchResult
+    ]
+  })
+
+```

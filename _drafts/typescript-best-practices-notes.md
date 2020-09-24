@@ -101,3 +101,26 @@ It helps you being sure you are implementing the `interface` correctly.
 ** Interface definitions working with this class
 
 ** Class definition
+
+* place abstract methods above the constructor for easy reading
+
+``` typescript
+export abstract class CsvFileReader {
+  data: MatchData[] = []
+
+  abstract mapRow(row: string[]): MatchData
+
+  constructor(public filename: string) {}
+
+  read(): void {
+    this.data = fs
+      .readFileSync(this.filename, {
+        encoding: 'utf-8'
+      })
+      .split('\n')
+      .map((row: string): string[] => row.split(','))
+      .map(this.mapRow)
+  }
+}
+
+```
