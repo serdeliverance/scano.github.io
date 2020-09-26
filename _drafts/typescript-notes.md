@@ -233,3 +233,17 @@ this.data = fs
   })
 
 ```
+
+## Generics
+
+``` typescript
+class HoldAnything<TypeOfData> {
+  data: TypeOfData
+}
+
+let holdNumber = new HoldAnything<number>()
+holdNumber.data = 123
+
+let holdString = new HoldAnything<string>()
+holdString.data = 'hola'
+```
