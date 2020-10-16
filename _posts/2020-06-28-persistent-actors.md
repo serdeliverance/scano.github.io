@@ -352,4 +352,4 @@ Snapshots are a way to store the state of an entity at a given point in time. Fo
 
 In this post we have seen what `Event Sourcing` is, its pros and cons and how we can implement it using `Persistent Actors` in `Akka`. You have to bear in mind that `Event Sourcing` is a different approach for designing systems and requires a mental shift. It allows you to have a rich domain model with powerfull semantics that express better what your business does. However, it is not a silver bullet (for a simple CRUD system, it could be an inefficient and overkilling solution). In future posts we will talk about Snapshots and more stuff related with `Akka Persistence`.
 
-The code is available on [GitHub](https://github.com/serdeliverance/sc-blog-code/tree/master/akka-persistence)
+The code is available on [GitHub](https://github.com/serdeliverance/akka-persistence-bc)
