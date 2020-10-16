@@ -143,7 +143,7 @@ Here is the test:
 }
 ```
 
-The `json` used and the extract auxiliar methods are defined in the [companion object](https://github.com/serdeliverance/sc-blog-code/blob/master/circe-optic-compose-demo/src/test/scala/CirceOpticsDemoSpec.scala) of the spec.
+The `json` used and the extract auxiliar methods are defined in the [companion object](https://github.com/serdeliverance/circe-optic-compose-demo-bc/blob/main/src/test/scala/CirceOpticsDemoSpec.scala) of the spec.
 
 If you run it, you can see that the conditions are met and the test passed.
 

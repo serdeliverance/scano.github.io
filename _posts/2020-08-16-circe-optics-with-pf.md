@@ -235,4 +235,4 @@ We can see that it is more easy to read and that has less boilerplate code.
 
 In this post we have seen how to use `Circe Optics` in conjuntion with some FP ideas that can make our code more modular, clean, mantainable, easy to understand and fun when dealing `JSON` modifications.
 
-The code is available on [GitHub](https://github.com/serdeliverance/sc-blog-code/tree/master/circe-optic-compose-demo)
+The code is available on [GitHub](https://github.com/serdeliverance/circe-optic-compose-demo-bc)
