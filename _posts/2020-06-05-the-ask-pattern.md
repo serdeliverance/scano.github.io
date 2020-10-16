@@ -191,4 +191,4 @@ Even though we can implement our requirement easily using `ask pattern`, you hav
 
 ## Conclusion
 
-In this post, we have seen what the `ask pattern` is and how we can use it through a simple use case. Also, we compared that solution with another one based on `changing behavior`. Finally, we need to bear in mind that it comes with a performance tradeoff and use it only when we really need it. The code is available on [GitHub](https://github.com/serdeliverance/sc-blog-code)
+In this post, we have seen what the `ask pattern` is and how we can use it through a simple use case. Also, we compared that solution with another one based on `changing behavior`. Finally, we need to bear in mind that it comes with a performance tradeoff and use it only when we really need it. The code is available on [GitHub](https://github.com/serdeliverance/ask-pattern-bc)
