@@ -247,3 +247,78 @@ holdNumber.data = 123
 let holdString = new HoldAnything<string>()
 holdString.data = 'hola'
 ```
+
+Another example of `Generics`
+
+``` typescript
+export class Sync<T> {
+  constructor(public rootUrl: string) {}
+
+  fetch(id: number): AxiosPromise {
+    return axios.get(`${this.rootUrl}/${id}`)
+  }
+
+  save(data: T): AxiosPromise {
+    let { id } = data
+
+    if (id) {
+      return axios.put(`${this.rootUrl}/${id}`, data)
+    } else {
+      return axios.post(this.rootUrl, data)
+    }
+  }
+}
+```
+
+### Adding restrictions over Generics
+
+``` typescript
+interface HasId {
+  id: number
+}
+
+export class Sync<T extends HasId> {
+  constructor(public rootUrl: string) {}
+
+  fetch(id: number): AxiosPromise {
+    return axios.get(`${this.rootUrl}/${id}`)
+  }
+
+  save(data: T): AxiosPromise {
+    let { id } = data
+
+    if (id) {
+      return axios.put(`${this.rootUrl}/${id}`, data)
+    } else {
+      return axios.post(this.rootUrl, data)
+    }
+  }
+}
+```
+## Static methods
+
+``` typescript
+export class Summary {
+  static winsAnalysisWithHtmlReport(team: string): Summary {
+    return new Summary(new WinsAnalysis(team), new HtmlReport())
+  }
+}
+
+let summary = Summary.winsAnalysisWithHtmlReport('Man United')
+```
+
+It is very useful to create easy to use APIs for the user, which reduce boilerplate code.
+
+
+## Optional properties on Interfaces
+
+``` typescript
+interface UserProps {
+  name?: string
+  age?: number
+}
+
+let user = new User({ name: 'pepe', age: 20 })
+
+user.set({ name: 'pepe2'})  // we are passing just one property because they are optional
+```
