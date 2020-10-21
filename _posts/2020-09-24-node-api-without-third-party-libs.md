@@ -45,9 +45,9 @@ server.listen(port, host, () =>
 
 As you can see, the code is very simple: just importing the `http` module, creating a handler function (`resquestHandler`) attend each request, creating a server using `http.createServer` passing to it the handler function and finally calling the `listen` method is enough to have a working server. Let's continue adding some functionallity.
 
-## An endpoint for calling another node process
+## An endpoint for calling another process
 
-Now, we need an endpoint whose purpose is execute another `node` script. We don't care about the script's final execution status. We just need to run it in a 'fire and forget' fashion, so, it will be a simple async call to run it and then returning immediately a response to the user without caring about the execution result of the script.
+Now, we need an endpoint whose purpose is execute another process in the file system. For this tutorial, it will be a bash script which calculates the factorial of a random number and stores the result inside a file. We don't care about the script's final execution status. We just need to run it in a 'fire and forget' fashion, so, it will be a simple async call to run and then returning immediately a response to the user without caring about the execution result of the script.
 
 For running a file system command from a Node js app, we'll use a builtin module called `child_process`, which allow us to spawn child process from our current one.
 
@@ -56,12 +56,16 @@ const http = require('http')
 const exec = require('child_process').exec
 
 const requestHandler = (req, res) => {
-  exec('bash factorialCalculator.sh', (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error running script: ${error}`)
-      return
-    }
-    console.log(stdout)
+  console.log('Executing a bash process which calculates the factorial of a random number')
+
+  let n = Math.floor((Math.random() * 10) + 1)
+
+  exec(`bash factorialCalculator.sh ${n}`, (error, stdout, stderr) => {
+      if (error) {
+          console.error(`Error running script: ${error}`)
+          return
+      }
+      console.log(stdout)
   })
 
   res.writeHead(200)
@@ -109,14 +113,12 @@ const requestHandler = (req, res) => {
   if (req.method === 'GET') {
     console.log('Retrieving file...')
 
-    let fileName = req.path
-
-    let filePath = `${filesDir}/${fileName}`
+    let filePath = `${fileDir}/${fileName}`
 
     fs.readFile(filePath, (err, data) => {
-      if (err) return {
-          res.writeHead(404)
-          res.end(JSON.stringify(err))
+      if (err) {
+        res.writeHead(404)
+        res.end(JSON.stringify(err))
       }
 
       res.writeHead(200)
@@ -164,49 +166,50 @@ const filesDir = 'files'
 
 const requestHandler = (req, res) => {
 
-    if (req.method === 'GET') {
-        console.log('Retrieving file...')
+  if (req.method === 'GET') {
+    console.log('Retrieving file...')
 
-        let fileName = req.path
+    let filePath = `${fileDir}/${fileName}`
 
-        let filePath = `${filesDir}/${fileName}`
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(404)
+        res.end(JSON.stringify(err))
+      }
 
-        fs.readFile(filePath, (err, data) => {
-            if (err) return {
-                res.writeHead(404)
-                res.end(JSON.stringify(err))
-            }
+      res.writeHead(200)
+      res.end(data)
+    })
+  }
 
-            res.writeHead(200)
-            res.end(data)
-        })
-    }
+  if (req.method === 'POST') {
+    console.log('Executing a bash process which calculates the factorial of a random number')
 
-    if (req.method === 'POST') {
-        console.log('Calling script...')
-        exec('bash factorialCalculator.sh', (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Error running script: ${error}`)
-            return
-          }
-          console.log(stdout)
-        })
+    let n = Math.floor((Math.random() * 10) + 1)
 
-        res.writeHead(200)
-        res.end()
-    }
+    exec(`bash factorialCalculator.sh ${n}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error running script: ${error}`)
+        return
+      }
+      console.log(stdout)
+    })
 
-    if (req.method === 'DELETE') {
-        console.log('cleaning directory')
-        fs.readdir(filesDir, (err, files) {
+    res.writeHead(200)
+    res.end()
+  }
 
-            if (err) throw err
+  if (req.method === 'DELETE') {
+    console.log('cleaning directory')
+    fs.readdir(filesDir, (err, files) {
 
-            files.forEach(file =>
-                fs.unlink(path.join(filesDir, file), (err) => if (err) throw err)
-            )
-        })
-    }
+      if (err) throw err
+
+      files.forEach(file =>
+        fs.unlink(path.join(filesDir, file), (err) => if (err) throw err)
+      )
+    })
+  }
 }
 
 const server = http.createServer(requestHandler)
@@ -219,56 +222,55 @@ We have defined various endpoints an its OK and maybe this API won't grow in a f
 First, we are going to extract the logic of executing the command, retrieving the file and cleaning directory as separated functions:
 
 ```javascript
-const runScript = (res) => {
-    console.log('Retrieving file...')
+const calculateFactorialAndSave = (res) => {
+  console.log('Executing a bash process which calculates the factorial of a random number')
 
-    let fileName = req.path
+  let n = Math.floor((Math.random() * 10) + 1)
 
-    let filePath = `${filesDir}/${fileName}`
+  exec(`bash factorialCalculator.sh ${n}`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error running script: ${error}`)
+      return
+    }
+    console.log(stdout)
+  })
 
-    fs.readFile(filePath, (err, data) => {
-        if (err) return {
-            res.writeHead(404)
-            res.end(JSON.stringify(err))
-        }
-
-        res.writeHead(200)
-        res.end(data)
-    })
+  res.writeHead(200)
+  res.end()
 }
 
 const getFile = (res) => {
   console.log('Retrieving file...')
 
-    let fileName = req.path
+  let filePath = `${fileDir}/${fileName}`
 
-    let filePath = `${filesDir}/${fileName}`
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      res.writeHead(404)
+      res.end(JSON.stringify(err))
+    }
 
-    fs.readFile(filePath, (err, data) => {
-        if (err) return {
-            res.writeHead(404)
-            res.end(JSON.stringify(err))
-        }
-
-        res.writeHead(200)
-        res.end(data)
-    })
+    res.writeHead(200)
+    res.end(data)
+  })
 }
 
 const cleanDirectory = (res) => {
-    console.log('cleaning directory')
+  console.log('cleaning directory')
 
-    fs.readdir(filesDir, (err, files) {
+  fs.readdir(fileDir, (err, files) => {
 
-        if (err) throw err
+    if (err) throw err
 
-        files.forEach(file =>
-            fs.unlink(path.join(filesDir, file), (err) => if (err) throw err)
-        )
-    })
+    files.forEach(file =>
+        fs.unlink(path.join(fileDir, file), (err) => {
+            if (err) throw err
+        }))
+  })
 
-    res.writeHead(200)
-    res.end()
+  res.writeHead(200)
+
+  res.end()
 }
 ```
 
@@ -278,7 +280,7 @@ Then, we can use a `switch` on our `requestHandler` to centralize all our `HTTP 
 const requestHandler = (req, res) => {
   switch (req.method) {
     case 'POST':
-      runScript(res)
+      calculateFactorialAndSave(res)
       break
     case 'GET':
       getFile(res)
@@ -301,63 +303,64 @@ const path = require('path')
 const host = 'localhost'
 const port = 8080
 
+const fileDir = 'files'
+const fileName = 'factorial.txt'
 
-const runScript = (res) => {
-    console.log('Retrieving file...')
+const calculateFactorialAndSave = (res) => {
+  console.log('Executing a bash process which calculates the factorial of a random number')
 
-    let fileName = req.path
+  let n = Math.floor((Math.random() * 10) + 1)
 
-    let filePath = `${filesDir}/${fileName}`
+  exec(`bash factorialCalculator.sh ${n}`, (error, stdout, stderr) => {
+    if (error) {
+        console.error(`Error running script: ${error}`)
+        return
+    }
+    console.log(stdout)
+  })
 
-    fs.readFile(filePath, (err, data) => {
-        if (err) return {
-            res.writeHead(404)
-            res.end(JSON.stringify(err))
-        }
-
-        res.writeHead(200)
-        res.end(data)
-    })
+  res.writeHead(200)
+  res.end()
 }
 
 const getFile = (res) => {
   console.log('Retrieving file...')
 
-    let fileName = req.path
+  let filePath = `${fileDir}/${fileName}`
 
-    let filePath = `${filesDir}/${fileName}`
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      res.writeHead(404)
+      res.end(JSON.stringify(err))
+    }
 
-    fs.readFile(filePath, (err, data) => {
-        if (err) return {
-            res.writeHead(404)
-            res.end(JSON.stringify(err))
-        }
-
-        res.writeHead(200)
-        res.end(data)
-    })
+    res.writeHead(200)
+    res.end(data)
+  })
 }
 
 const cleanDirectory = (res) => {
-    console.log('cleaning directory')
+  console.log('cleaning directory')
 
-    fs.readdir(filesDir, (err, files) {
+  fs.readdir(fileDir, (err, files) => {
 
+    if (err) throw err
+
+    files.forEach(file =>
+      fs.unlink(path.join(fileDir, file), (err) => {
         if (err) throw err
+      }))
+  })
 
-        files.forEach(file =>
-            fs.unlink(path.join(filesDir, file), (err) => if (err) throw err)
-        )
-    })
+  res.writeHead(200)
 
-    res.writeHead(200)
-    res.end()
+  res.end()
 }
 
 const requestHandler = (req, res) => {
   switch (req.method) {
     case 'POST':
-      runScript(res)
+      calculateFactorialAndSave(res)
       break
     case 'GET':
       getFile(res)
@@ -378,3 +381,5 @@ server.listen(port, host, () => console.log(`Server running on http://${host}:${
 In this article, we saw how using the built-in modules that comes with `Node` is enough to do simple and powerful things. I believe that the power of `Node` not only lays on its vast library ecosystem, but in its simplicity. Furtermore, using it in conjunction with modern javascript idioms, make it a great and enjoyable platform to write code in.
 
 I think it would be great to write a post about implementing similar stuff using the younger, type safer and still less popular Nodejs's brother: `Deno`. So, I'll pick that idea for a future post.
+
+The code is available on [GitHub](https://github.com/serdeliverance/node-minimalistic-api-bc)
