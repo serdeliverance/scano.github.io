@@ -322,3 +322,40 @@ let user = new User({ name: 'pepe', age: 20 })
 
 user.set({ name: 'pepe2'})  // we are passing just one property because they are optional
 ```
+
+## TS with JS libs
+
+We can run into issues when working with third party libraries that are written in Javascript, because they may no be defined types (remember: typescript requires have all our types defined).
+
+An example of that is working with type definition files (TDF). For example: imagine we are writting a REST API using Express. We add the TDF for express (npm install @types/express), and inspecting the code we saw that this TFD states that the Response type has an body member of type any. This is not true (Express that not has body defined in the Request object). So, remember that TDFs are created by regular contributors most of times, so there can be issues.
+
+There are some approaches for handling this issues:
+
+1) Use the lib normally and add the basic type annotations where possible.
+
+2) Use a TS adapter library tha has helpers for using your lib with TS
+
+3) Twist your lib to work with TS classes
+
+### Example of the first approach:
+
+``` typescript
+/**
+ * Interface that assures that request has a body element which is typed correctly.
+ *
+ */
+interface RequestWithBody extends Request {
+  body: { [key: string]: string | undefined }
+}
+
+router.post('/login', (req: RequestWithBody, res: Response) => {
+  // now we are sure that req has a body attribute
+  let { email, password } = req.body
+
+  if (email) {
+    res.send(email.toUpperCase())
+  } else {
+    res.send('You must provide an email')
+  }
+})
+```
