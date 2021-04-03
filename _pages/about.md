@@ -5,6 +5,8 @@ header:
   image: '/images/header.jpg'
 ---
 
-I define myself as a software engineer that loves solving problems and delivering high quality software. I like challenges, working with amazing people and I have a strong commitment to develiring value to the business and self improvement.
+Fullstack engineer that love solving problems and learning new things. Most of my experience is based on JVM related technologies (such as Java/Spring or Scala/Akka/Play), but I sometimes do some front end stuff (Angular/React).
 
-The aim of this blog is to share notes and ideas about software development. This blog is mainly focused on Scala, Akka, FP, Node and Typescript technologies.
+I'm very interested in functional programming and concurrency. Because of that, I'm having fun trying to incorporate some reactive streams and functional programming ideas when solving problems wherever them make sense to the business.
+
+Also, I'm a Systems Engineer graduated from Universidad Tecnológica Nacional with a postgraduate in Business Intelligence.
