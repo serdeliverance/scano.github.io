@@ -55,11 +55,25 @@ Or whenever you have to manipulate data as a pipeline or deal with potentially i
 
 # Akka Streams vs Reactive Streams vs Reactive Systems
 
+Quoting [the Reactive Streams documentation](https://www.reactive-streams.org/): `Reactive Streams is an initiative to provide a standard for asynchronous stream processing with non-blocking back pressure`.
+
+So, `Reactive Streams` is an specification of how to deal with asynchronous boundaries without data lost or resource exhaustion.
+
+In contrast, `Akka Streams` is an API that is compliant with that specification, but it offers its own API which is most suitable for end users. Remember, `Akka Streams` is all about building/expressing asynchronous pipelines and component reutilization.
+
+On the other hand, `Reactive Systems` is a more broader topic. It is about building reactive system architectures as a whole, being compliant with a series of postulates that guarantees responsiveness, fault tolerant, loosed-coupled and scalable systems. In comparison, `Akka Streams` could be seen as a tool that can help to build reactive systems.
+
+Now, we are more clear about what `Akka Stream` is, but before diving into its API, we need to talk about `Back pressure`
+
+# Back pressure
+
+`TODO`
+
+Now, we are ready to write our first graph (remember this term).
+
 # Main components of a stream topology
 
 # It's all about component reutilization
-
-# Backpressure
 
 # Materializing a graph
 
