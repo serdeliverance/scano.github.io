@@ -88,11 +88,50 @@ It's important to mention that all this comunication between producers and consu
 
 Now, we are ready to write our first graph (remember this term).
 
-# Main components of a stream topology
+# Dependencies and getting started
+
+First of all, add the following dependency to your `build.sbt`
+
+``` scala
+val AkkaVersion = "2.6.14"
+libraryDependencies += "com.typesafe.akka" %% "akka-stream" % AkkaVersion
+```
+
+Lets create a new `object` and place the needed imports and infrastructure for running streams:
+
+``` scala
+import akka.actor.ActorSystem
+import akka.stream.scaladsl._
+
+object GettingStarted extends App {
+  implicit val system = ActorSystem("GettingStarted")
+}
+```
+
+You may be wondering why we need an `ActorSystem` here. In order to run our streams we need a `Materializer`. This component has the responsility of intialize all the required resources our stream needs in order to run. A `Materializer` is bringed into scope through the `ActorSystem`. Well talk more about this later.
+
+# Main stream components
+
+`Source` is the beginning of the stream. Its purpose is to emit elements (because of that, it just has output).
+
+``` scala
+val source: Source[Int, NotUsed] = Source(1 to)
+```
+
+The first type parameter refers to the type of value the `Source` emits. The second one refers to the `materialized value type` (more on this later).
+
+`Flow` is an intermediate step that performs transformations over the elements it receives. So, it has input and produces output. For example:
+
+``` scala
+val addOne: Flow[Int, Int, NotUsed] = Flow[Int].map(x => x + 1)
+```
+
+The first two parameters refer to the input and output types, respectively. The last one is the type of the `materialized value`.
+
 
 # It's all about component reutilization
 
-# Materializing a graph
+# Materialization
 
 # Materialized value
 
