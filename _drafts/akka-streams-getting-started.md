@@ -23,7 +23,7 @@ Imagine you have are working on a method that receives a list of transactions an
 
 So, there are scenarios when processing the data as a whole is not an option.
 
-Stream data processing is a way of dealing with data transformation that resembles how computers internally work (for example, low level protocols such as TCP). In a streaming pipeline, elements flow from an origin to a destination, passing through different intermediate transformations.
+Stream data processing is a way of dealing with data transformation that resembles how computers internally work (for example, low level protocols such as TCP). In a streaming pipeline, elements flow from an origin to a destination, emitted one at a time, passing through different intermediate transformations.
 
 # Akka Streams
 
@@ -67,7 +67,24 @@ Now, we are more clear about what `Akka Stream` is, but before diving into its A
 
 # Back pressure
 
-`TODO`
+Streams are similar to producer-consumer architectures, where elements are emitted by a producer and consumed by consumers. In those arquitectures, we can lead to the following scenarios:
+
+* slow producer and fast consumer
+* fast producer and slow consumer
+
+The first scenario is acceptable. There's no problem with having a slow consumer. In that case, at least the consumer will be idle, but there's no buffer overflow risk.
+
+`TODO image slow producer and fast consumer`
+
+However, the second scenario is something we want to be cared about. If we have a fast consumer and a slow consumer, it will lead to a situation where the consumer's buffer got overflowed. `Back-pressure` solves this problem.
+
+`TODO image fast producer and slow consumer`
+
+`Back-pressure` is a flow-control mechanism where the consumer signals the producer with the amount of elements it is able to handle. In order words, it is a comunication from consumer to producer, where the first one signals the demand it can process. That way, producers can adjust their rate of emitting elements.
+
+`TODO image backpressure`
+
+It's important to mention that all this comunication between producers and consumers is asynchronous.
 
 Now, we are ready to write our first graph (remember this term).
 
