@@ -25,7 +25,7 @@ So, there are scenarios when processing the data as a whole is not an option.
 
 Stream data processing is a way of dealing with data transformation that resembles how computers internally work (at the end, everything is a flow of bytes that flow from a computer into another, or through different tiers of the same computer). In a streaming pipeline, elements flow from an origin to a destination, emitted one at a time, passing through different intermediate transformations.
 
-![flow sample](/assets/images/akka-streams/01-akka-streams-flow-sample.png "Flow Sample")
+![flow sample]({{ site.url }}/assets/images/akka-streams/01-akka-streams-flow-sample.png "Flow Sample")
 
 # Akka Streams
 
