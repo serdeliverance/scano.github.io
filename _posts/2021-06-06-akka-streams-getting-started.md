@@ -19,11 +19,11 @@ Before talking about Akka Streams, it is important to know what streams are.
 
 # What are streams?
 
-Imagine you are working on a method that receives a list of transactions and performs some kind of calculation. If you receive 100 elements there may be no problem. But what if the app growns and you start receiving 10k, 100k or even more transactions each time. Generally, collections are data structures that needs to be fully loaded in memory before processing.
+Imagine you are working on a method that receives a list of transactions and performs some kind of calculation. If you receive 100 elements there may be no problem. But what if the app grows and you start receiving 10k, 100k or even more transactions each time. Generally, collections are data structures that needs to be fully loaded in memory before processing.
 
-So, there are scenarios when processing the data as a whole is not an option.
+So, there are scenarios when processing the data as a whole is not an option. Another example of this can be processing or even serving a big file.
 
-Stream data processing is a way of dealing with data transformation that resembles how computers internally work (at the end, everything is a flow of bytes that flow from a computer into another, or through different tiers of the same computer). In a streaming pipeline, elements flow from an origin to a destination, emitted one at a time, passing through different intermediate transformations.
+Stream data processing is a way of dealing with data transformation that resembles how computers internally work (at the end, everything is a flow of bytes that flows from a computer into another, or through different tiers of the same computer). In a streaming pipeline, elements flow from an origin to a destination, being emitted one at a time, passing through different intermediate transformations.
 
 ![flow sample]({{ site.baseurl }}/assets/images/akka-streams/01-akka-streams-flow-sample.png "Flow Sample")
 
