@@ -25,7 +25,7 @@ So, there are scenarios when processing the data as a whole is not an option.
 
 Stream data processing is a way of dealing with data transformation that resembles how computers internally work (at the end, everything is a flow of bytes that flow from a computer into another, or through different tiers of the same computer). In a streaming pipeline, elements flow from an origin to a destination, emitted one at a time, passing through different intermediate transformations.
 
-![flow sample]({{ site.url }}/assets/images/akka-streams/01-akka-streams-flow-sample.png "Flow Sample")
+![flow sample]({{ site.baseurl }}/assets/images/akka-streams/01-akka-streams-flow-sample.png "Flow Sample")
 
 # Akka Streams
 
@@ -74,17 +74,17 @@ Streams are similar to producer-consumer architectures, where elements are emitt
 * slow producer and fast consumer
 * fast producer and slow consumer
 
-![slow producer fast consumer](/assets/images/akka-streams/sonic-slow-producer-fast-consumer.png "Slow Producer, Fast Consumer")
+![slow producer fast consumer]({{ site.baseurl }}/assets/images/akka-streams/sonic-slow-producer-fast-consumer.png "Slow Producer, Fast Consumer")
 
 The first scenario is acceptable. There's no problem having a slow consumer. In that case, at least the consumer will be idle, but there's no buffer overflow risk.
 
-![fast producer slow consumer](/assets/images/akka-streams/sonic-fast-producer-slow-consumer.png "Fast Producer, Slow Consumer")
+![fast producer slow consumer]({{ site.baseurl }}/assets/images/akka-streams/sonic-fast-producer-slow-consumer.png "Fast Producer, Slow Consumer")
 
 However, the second scenario is something we want to be cared about. If we have a fast consumer and a slow consumer, it will lead to a situation where the consumer's buffer got overflowed. `Back-pressure` comes to solve this problem.
 
 `Back-pressure` is a flow-control mechanism where the consumer signals the producer with the amount of elements it is able to handle. In order words, it is a comunication from consumer to producer, where the first one signals the demand it can process. That way, producers can adjust their rate of emitting elements.
 
-![backpressure](/assets/images/akka-streams/sonic-backpressure.png "Backpressure")
+![backpressure]({{ site.baseurl }}/assets/images/akka-streams/sonic-backpressure.png "Backpressure")
 
 It's important to mention that all this comunication between producers and consumers is asynchronous.
 
@@ -120,7 +120,7 @@ Why we need an `ActorSystem` here? We'll answer that question along this tutoria
 
 # Main stream components
 
-![source](/assets/images/akka-streams/source.png "Source")
+![source]({{ site.baseurl }}/assets/images/akka-streams/source.png "Source")
 
 `Source` is the beginning of the stream. Its purpose is to emit elements (because of that, it just has output).
 
@@ -130,7 +130,7 @@ val source: Source[Int, NotUsed] = Source(1 to 1000)
 
 The first type parameter refers to the type of value the `Source` emits. The second one refers to the `materialized value type` (more on this later).
 
-![flow](/assets/images/akka-streams/flow.png "Flow")
+![flow]({{ site.baseurl }}/assets/images/akka-streams/flow.png "Flow")
 
 `Flow` is an intermediate step that performs transformations over the elements it receives. So, it has input and produces output. For example:
 
@@ -140,7 +140,7 @@ val addOne: Flow[Int, Int, NotUsed] = Flow[Int].map(x => x + 1)
 
 The first two parameters refer to the input and output types, respectively. The last one is the type of the `materialized value`.
 
-![sink](/assets/images/akka-streams/sink.png "Sink")
+![sink]({{ site.baseurl }}/assets/images/akka-streams/sink.png "Sink")
 
 `Sink` is the final piece of your graph. It is the susbcriber to data sent by the `Source`. A Sink just has input data a produce no output: 
 
@@ -150,7 +150,7 @@ val sinkPrintln = Sink.foreach(println)
 
 When we have all our components connected, we say that we have a `RunnableGraph`, or a graph, for short. A graph is the topology built by connecting a source to a sink, passing through different intermediate transformation/processing steps (flows). It is important to know that a graph is just a description (a blueprint) of the pipeline. Nothing has happend yet (no resources have been assigned or processing has been started).
 
-![graph](/assets/images/akka-streams/graph.png "Graph")
+![graph]({{ site.baseurl }}/assets/images/akka-streams/graph.png "Graph")
 
 
 # It's all about component reutilization
