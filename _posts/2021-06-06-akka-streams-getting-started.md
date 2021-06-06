@@ -275,6 +275,16 @@ val result: Future[IOResult] = graph2.run()
 
 ```
 
+`TODO` complete this section
+
+# Alpakka
+
+`TODO` complete this section
+
+# A real world example
+
+`TODO` complete this section
+
 # Conclusion
 
 In this tutorial we have seen what `Akka Stream` is and what problems it solves. However, some topics were missing, such as logging, error handling, stream lifecycle, testing and some operators. Those will be covered in future posts. Also, I want to write a dedicated one about working with `Graph DSL`, which is a powerful API that `Akka Streams` provide us in order to write no linear asynchronous pipelines.
