@@ -14,17 +14,41 @@ header:
 
 # Intro
 
+In this post, we are going to see an intro to `Slick`, which is a powerfull library for interacting with relational databases in `Scala`.
+
 # Slick
 
-* main components (Query, DBAction, Future)
+First of all, it is important to mention that `Slick` is not an ORM. It is a lower level API. You can see `Slick` as a wrapper around `JDBC`.
+
+`Slick` is a `FRM` (`Functional Relational Mapper`). It means that it tries to embrace relational database access by providing an API that feels like working with collections and that takes advantages of functional programming concepts, such as composition. Also, `Slick` is asynchronous and provides streaming capabilities.
+
+In the `Slick` world, it is important to know three concepts, which together are known as the `Monadic Trio`: Query, DBAction, Future. Before diving into each of them (excepts `Future`, which is a cross topic that will deserve a dedicated post comming soon), it is important to set up some dependencies.
+
+# Project setup
+
+Let's create a `sbt` project and add the following dependencies to your `build.sbt`
+
+``` scala
+libraryDependencies ++= Seq(
+  "com.typesafe.slick" %% "slick" % "3.3.2",
+  "com.h2database" % "h2" % "1.4.200",
+  "ch.qos.logback" % "logback-classic" % "1.2.3"
+)
+```
 
 # Queries
 
-# Typed Queries
+## Table Queries
 
 # DBAction
 
-# Future
+## Combining Actions
+
+## Transactions
+
+# Conclusion
+
+In a future article, we are going to talk about `Slick` best practices for real world projects.
 
 ###### Notas
 
@@ -231,3 +255,87 @@ messages ++= testMessages
 ```
 
 Es importante saber que Slick sabe como hacer optimizaciones de este tipo de inserts segun el tipo de base con la cual nos estamos comunicando.
+
+
+## Notas chapter 04
+
+* combinar acciones: andThen (o >>)
+
+combina ambas acciones, retornando el resultado de la segunda accion.
+
+* es importante mencionar que cuando se combinan acciones no estamos ejecutando transacciones. Es importante diferenciar esto del concepto de transaccionalidad
+
+* `DBIO.seq` es parecido a `andThen`, pero con la diferencia que el resultado final también es descartado.
+
+``` scala
+val resetSeq: DBIO[Unit] = DBIO.seq(messages.delete, messages.size.result)
+```
+
+* `map`: mapea sobre el resultado de la acción
+
+``` scala
+val text: DBIO[Option[String]] = messages.map(_.content).result.headOption
+```
+
+* `flatMap` da mas control sobre la secuencia de acciones a ejecutar, y decidir qué ejecutar en cada step.
+
+``` scala
+val logResetAction: DBIO[Int] =
+  delete.flatMap {
+    case 0 => DBIO.successful(0)
+    case n => insert(n)
+}
+```
+
+* a pesar de que podemos usar flatMap para secuenciar acciones, generalmente es recomendable es recomendable combinar varias acciones en una con métodos como `DBIO.seq` and `andThen`
+
+* `DBIO.sequence`
+
+* `DBIO.fold` para combinar los resultados de varios `DBIO`
+
+``` scala
+val report1: DBIO[Int] = DBIO.successful(41)
+val report2: DBIO[Int] = DBIO.successful(1)
+
+val summary: DBIO[Int] = DBIO.fold(reports, default) {
+  (total, report) => total + report
+}
+```
+
+* `DBIO.zip`
+
+``` scala
+val zip: DBIO[(Int, Seq[Message])] = messages.size.result zip messages.filter(_.sender === "HAL").result
+```
+
+* `cleanUp` corre luego de que finaliza el action y tiene acceso a la info del error como un `Option[Throwable]`:
+
+``` scala
+// An action to record problems we encounter:
+def log(err: Throwable): DBIO[Int] = messages += Message("SYSTEM", err.getMessage)
+
+// Pretend this is important work which might fail:
+val work = DBIO.failed(new RuntimeException("Boom!"))
+val action: DBIO[Int] = work.cleanUp {
+  case Some(err) => log(err)
+  case None => DBIO.successful(0)
+}
+```
+
+* Logging
+
+podemos configurar el logging de slick en `src/main/resources/logback.yml`
+
+``` scala
+<logger name="slick.jdbc.JdbcBackend.statement" level="DEBUG"/>
+```
+
+* Transacciones
+
+``` scala
+val willRollback = (
+  (messages += Message("HAL", "Daisy, Daisy...")) >>
+  (messages += Message("Dave", "Please, anything but your singing")) >>
+  (messages += Message("HAL", "Give me your answer do"))
+).transactionally
+```
